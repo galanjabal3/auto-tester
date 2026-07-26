@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getRuns, getRun, getTestSpecs } from '../api/client';
 import Pagination from '../components/Pagination';
-import { ChevronDown, ChevronUp, CheckCircle, XCircle, Play, Film, Code } from 'lucide-react';
+import { ChevronDown, ChevronUp, CheckCircle, XCircle, Play, Film, Code, Image } from 'lucide-react';
 
 interface Run {
   id: string;
@@ -41,6 +41,7 @@ export default function Runs() {
   const [playingVideo, setPlayingVideo] = useState<string | null>(null);
   const [videoSpeed, setVideoSpeed] = useState<number>(0.5);
   const [page, setPage] = useState(1);
+  const [viewingScreenshot, setViewingScreenshot] = useState<string | null>(null);
   const perPage = 10;
 
   useEffect(() => {
@@ -78,6 +79,18 @@ export default function Runs() {
       return `/api/artifacts/${folder}/${file}`;
     }
     const filename = parts.pop() || 'video.webm';
+    return `/api/artifacts/${filename}`;
+  };
+
+  const getScreenshotUrl = (screenshotPath: string) => {
+    const parts = screenshotPath.replace(/\\/g, '/').split('/');
+    const folderIndex = parts.indexOf('artifacts');
+    if (folderIndex >= 0 && folderIndex < parts.length - 2) {
+      const folder = parts[folderIndex + 1];
+      const file = parts[folderIndex + 2];
+      return `/api/artifacts/${folder}/${file}`;
+    }
+    const filename = parts.pop() || 'screenshot.png';
     return `/api/artifacts/${filename}`;
   };
 
@@ -166,6 +179,26 @@ export default function Runs() {
                     </div>
                   )}
 
+                  {/* Screenshot viewer */}
+                  {viewingScreenshot && (
+                    <div className="p-4 bg-gray-50 dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs text-gray-500">Failure Screenshot</span>
+                        <button
+                          onClick={() => setViewingScreenshot(null)}
+                          className="text-xs text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                        >
+                          Close
+                        </button>
+                      </div>
+                      <img
+                        src={getScreenshotUrl(viewingScreenshot)}
+                        alt="Failure screenshot"
+                        className="max-w-3xl rounded-lg border border-gray-200 dark:border-gray-800"
+                      />
+                    </div>
+                  )}
+
                   {/* Test list */}
                   <div className="divide-y divide-gray-200 dark:divide-gray-800">
                     {runDetails[run.id].map((test, i) => {
@@ -210,6 +243,17 @@ export default function Runs() {
                                   className="flex items-center gap-1 px-2 py-1 bg-emerald-500/10 text-emerald-400 rounded hover:bg-emerald-500/20 transition-colors"
                                 >
                                   <Film size={12} /> Video
+                                </button>
+                              )}
+                              {test.screenshot_path && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setViewingScreenshot(test.screenshot_path);
+                                  }}
+                                  className="flex items-center gap-1 px-2 py-1 bg-amber-500/10 text-amber-400 rounded hover:bg-amber-500/20 transition-colors"
+                                >
+                                  <Image size={12} /> Screenshot
                                 </button>
                               )}
                             </div>

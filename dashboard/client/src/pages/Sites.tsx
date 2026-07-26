@@ -36,6 +36,17 @@ const defaultForm = {
   tests: '',
 };
 
+function validate(form: typeof defaultForm) {
+  const errors: Record<string, string> = {};
+  if (!form.name.trim()) errors.name = 'Site name is required';
+  if (!form.base_url.trim()) {
+    errors.base_url = 'Base URL is required';
+  } else if (!/^https?:\/\/.+/.test(form.base_url.trim())) {
+    errors.base_url = 'Must start with http:// or https://';
+  }
+  return errors;
+}
+
 export default function Sites() {
   const [sites, setSites] = useState<Site[]>([]);
   const [showForm, setShowForm] = useState(false);
@@ -54,6 +65,8 @@ export default function Sites() {
   const { addToast, ToastContainer } = useToast();
   const [page, setPage] = useState(1);
   const perPage = 10;
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     getSites()
@@ -70,11 +83,16 @@ export default function Sites() {
   }, [activeRun]);
 
   const handleCreate = async () => {
+    const validationErrors = validate(form);
+    setErrors(validationErrors);
+    setTouched({ name: true, base_url: true });
+    if (Object.keys(validationErrors).length > 0) return;
+
     const tests = form.tests.split(',').map(t => t.trim()).filter(Boolean);
     try {
       const site = await createSite({
-        name: form.name,
-        base_url: form.base_url,
+        name: form.name.trim(),
+        base_url: form.base_url.trim(),
         login_path: form.login_path,
         email_field: form.email_field,
         password_field: form.password_field,
@@ -85,6 +103,8 @@ export default function Sites() {
       });
       setSites([site, ...sites]);
       setForm(defaultForm);
+      setErrors({});
+      setTouched({});
       setShowForm(false);
       setShowAdvanced(false);
       addToast('success', `Site "${site.name}" created`);
@@ -172,11 +192,37 @@ export default function Sites() {
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div>
               <label className={labelClass}>Site Name *</label>
-              <input placeholder="My Website" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} className={inputClass} />
+              <input
+                placeholder="My Website"
+                value={form.name}
+                onChange={e => {
+                  setForm({ ...form, name: e.target.value });
+                  if (touched.name) setErrors(validate({ ...form, name: e.target.value }));
+                }}
+                onBlur={() => {
+                  setTouched(t => ({ ...t, name: true }));
+                  setErrors(validate(form));
+                }}
+                className={`${inputClass} ${touched.name && errors.name ? 'border-red-500 focus:border-red-500' : ''}`}
+              />
+              {touched.name && errors.name && <p className="text-xs text-red-500 mt-1">{errors.name}</p>}
             </div>
             <div>
               <label className={labelClass}>Base URL *</label>
-              <input placeholder="https://example.com" value={form.base_url} onChange={e => setForm({ ...form, base_url: e.target.value })} className={inputClass} />
+              <input
+                placeholder="https://example.com"
+                value={form.base_url}
+                onChange={e => {
+                  setForm({ ...form, base_url: e.target.value });
+                  if (touched.base_url) setErrors(validate({ ...form, base_url: e.target.value }));
+                }}
+                onBlur={() => {
+                  setTouched(t => ({ ...t, base_url: true }));
+                  setErrors(validate(form));
+                }}
+                className={`${inputClass} ${touched.base_url && errors.base_url ? 'border-red-500 focus:border-red-500' : ''}`}
+              />
+              {touched.base_url && errors.base_url && <p className="text-xs text-red-500 mt-1">{errors.base_url}</p>}
             </div>
           </div>
 
@@ -185,7 +231,7 @@ export default function Sites() {
             <input placeholder="login, dashboard, checkout" value={form.tests} onChange={e => setForm({ ...form, tests: e.target.value })} className={inputClass} />
           </div>
 
-          <button onClick={() => setShowAdvanced(!showAdvanced)} className="flex items-center gap-2 text-xs text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 mb-4 transition-colors">
+          <button onClick={() => setShowAdvanced(!showAdvanced)} className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-700 mb-4 transition-colors">
             <Settings size={14} />
             {showAdvanced ? 'Hide' : 'Show'} auth & threshold settings
           </button>
@@ -221,7 +267,7 @@ export default function Sites() {
 
           <div className="flex gap-3">
             <button onClick={handleCreate} className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 rounded-lg text-sm font-medium">Create</button>
-            <button onClick={() => { setShowForm(false); setShowAdvanced(false); }} className="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-lg text-sm font-medium">Cancel</button>
+            <button onClick={() => { setShowForm(false); setShowAdvanced(false); setErrors({}); setTouched({}); }} className="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-lg text-sm font-medium">Cancel</button>
           </div>
         </div>
       )}
