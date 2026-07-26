@@ -1,0 +1,13 @@
+name: "My Website"
+base_url: "https://example.com"
+auth:
+  login_path: "/login"
+  email_field: '[name="email"]'
+  password_field: '[name="password"]'
+  submit_button: 'button[type="submit"]'
+  success_selector: ".dashboard"
+thresholds:
+  api_response_ms: 2000
+tests:
+  - login
+  - dashboard

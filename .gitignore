@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Environment (secrets)
+.env
+
+# Login sessions
+.sessions/
+
+# Test output
+reports/
+test-results/
+playwright-report/
+
+# Site configs (user-specific, auto-generated from dashboard)
+configs/sites/
+
+# Personal test files (recorded from dashboard, user-specific)
+tests/flows/gk-*
+tests/flows/teacher*
+tests/flows/test.spec.ts
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# IDE
+.vscode/
+.idea/
