@@ -1,3 +1,6 @@
+import dotenv from 'dotenv';
+dotenv.config({ path: '../../.env' });
+
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
@@ -44,6 +47,12 @@ app.get('/api/artifacts/:folder/:file', (req, res) => {
   res.setHeader('Content-Type', mimeTypes[ext] || 'application/octet-stream');
   res.setHeader('Cache-Control', 'public, max-age=3600');
   fs.createReadStream(filePath).pipe(res);
+});
+
+// Error handler (must be after all routes)
+app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  console.error('Server error:', err.message);
+  res.status(500).json({ error: 'Internal server error' });
 });
 
 app.listen(PORT, () => {

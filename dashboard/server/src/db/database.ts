@@ -1,11 +1,11 @@
 import { Pool } from 'pg';
 
 const pool = new Pool({
-  host: 'localhost',
-  port: 5432,
-  database: 'auto_tester',
-  user: 'admin',
-  password: '',
+  host: process.env.PGHOST || 'localhost',
+  port: parseInt(process.env.PGPORT || '5432'),
+  database: process.env.PGDATABASE || 'auto_tester',
+  user: process.env.PGUSER || 'admin',
+  password: process.env.PGPASSWORD || '',
 });
 
 // Create tables

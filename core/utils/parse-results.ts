@@ -1,3 +1,4 @@
+import fs from 'fs';
 import { TestResult } from '../types';
 
 interface ParsedTest {
@@ -43,7 +44,6 @@ export function extractTests(suites: any[]): ParsedTest[] {
 }
 
 export function parsePlaywrightResults(resultsFile: string): ParsedTest[] {
-  const fs = require('fs');
   if (!fs.existsSync(resultsFile)) return [];
   try {
     const raw = JSON.parse(fs.readFileSync(resultsFile, 'utf8'));
