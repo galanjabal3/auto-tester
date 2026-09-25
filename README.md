@@ -1,5 +1,7 @@
 # Auto-Tester
 
+![CI](https://github.com/galanjabal3/auto-tester/actions/workflows/ci.yml/badge.svg) ![License: MIT](https://img.shields.io/badge/license-MIT-7c3aed)
+
 Automated web testing platform with slow API detection, live dashboard, and real-time test streaming.
 
 Built in two phases: **CLI engine** for running Playwright tests against multiple sites, and a **self-hosted dashboard** for managing sites, viewing results, and streaming test runs live.
