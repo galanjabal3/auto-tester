@@ -69,9 +69,17 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
+      # Tests target the public demo site (same as local .env / configs/sites/the-internet.yaml).
+      # example-flow.spec.ts is excluded: it is a copy-me template hitting /some-feature,
+      # which exists on no real target, so it can never pass in CI.
       - name: Run tests
-        run: npm test
+        run: npx playwright test tests/common/login.spec.ts tests/flows/checkboxes.spec.ts tests/flows/dropdown.spec.ts tests/flows/dynamic-controls.spec.ts
         env:
-          BASE_URL: http://localhost:3000
-          TEST_EMAIL: ${{ secrets.TEST_EMAIL }}
-          TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}
+          BASE_URL: https://the-internet.herokuapp.com
+          LOGIN_PATH: /login
+          EMAIL_SELECTOR: '[name="username"]'
+          PASSWORD_SELECTOR: '[name="password"]'
+          SUBMIT_SELECTOR: 'button[type="submit"]'
+          SLOW_API_THRESHOLD_MS: 3000
+          TEST_EMAIL: ${{ secrets.TEST_EMAIL || 'tomsmith' }}
+          TEST_PASSWORD: ${{ secrets.TEST_PASSWORD || 'SuperSecretPassword!' }}
